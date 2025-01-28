@@ -1,10 +1,16 @@
 import { Builder, Browser, By, until, WebDriver } from 'selenium-webdriver'
 import { Options } from 'selenium-webdriver/chrome'
+import express from 'express'
+import cors from 'cors'
+const app = express();
+const port = 4000;
 
-async function openMeet(driver: WebDriver) {
+
+
+async function openMeet(driver: WebDriver,link:string) {
   
   try {
-    await driver.get("https://meet.google.com/tjf-mxar-qri");
+    await driver.get(link);
     ​​const popupButton = await driver.wait(until.elementLocated(By.xpath('//span[contains(text(), "Got it")]')), 10000);
     await popupButton.click()
     ​​const nameInput = await driver.wait(until.elementLocated(By.xpath('//input[@placeholder="Your name"]')), 10000);
@@ -137,11 +143,39 @@ async function startScreenshare(driver: WebDriver) {
     driver.sleep(1000000)
 }
 
-async function main() {
-    const driver = await getDriver();
-    await openMeet(driver);
+// async function main() {
+//     const driver = await getDriver();
+//     await openMeet(driver);
+//     await new Promise(x => setTimeout(x, 20000));
+//     // wait until admin lets u join
+//     await startScreenshare(driver);    
+// }
+// main();
+
+app.use(express.json());
+
+app.use(cors());
+
+
+
+app.post('/start', async (req, res) => {
+     
+    const { link } = req.body;
+    console.log("link", link)
+
+    if (!link) {
+        res.status(400).json({ message: "Please provide a Google Meet link." });
+        return;
+    }
+
+   const  driver = await getDriver();
+    await openMeet(driver, req.body.link);
     await new Promise(x => setTimeout(x, 20000));
     // wait until admin lets u join
-    await startScreenshare(driver);    
-}
-main();
+    await startScreenshare(driver);
+    res.send("started");
+
+});
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+});
