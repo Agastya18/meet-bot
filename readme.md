@@ -26,3 +26,12 @@ Install node dependencies:
 ```bash
 npm install
 ```
+
+
+### Step 3: How to use
+Open postman (use POST request with json body):
+```bash
+{
+    "link":"meet_url"
+}
+```
